@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>แบบประเมินการฝึกซ้อมดับเพลิงและอพยพหนีไฟ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background-color: #f3f4f6; }
+    .tab-btn.active { border-bottom-color: #ef4444; color: #dc2626; font-weight: 600; background-color: #fef2f2; }
+    canvas { touch-action: none; cursor: crosshair; }
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background-color: white; font-size: 12pt; }
+      .tab-content { display: block !important; }
+      .card { border: 1px solid #ccc; box-shadow: none; margin-bottom: 1rem; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-12">
+
+  <!-- Header -->
+  <header class="bg-red-700 text-white shadow-md sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="p-2 bg-red-800 rounded-lg">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path></svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">แบบประเมินการฝึกซ้อมดับเพลิงและอพยพหนีไฟ</h1>
+          <p class="text-xs text-red-200">อ้างอิงกฎกระทรวงฯ พ.ศ. 2555 (สำหรับ Tablet)</p>
+        </div>
+      </div>
+      <div class="flex space-x-2">
+        <button onclick="saveLocalData()" class="px-3 py-2 bg-red-800 hover:bg-red-900 rounded-lg text-sm flex items-center gap-1 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+          บันทึกร่าง
+        </button>
+        <button onclick="window.print()" class="px-3 py-2 bg-white text-red-700 font-medium rounded-lg text-sm hover:bg-slate-100 flex items-center gap-1 transition shadow">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          พิมพ์ / PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 mt-4">
+
+    <!-- Navigation Tabs -->
+    <div class="no-print bg-white rounded-xl shadow-sm border border-slate-200 mb-4 overflow-x-auto">
+      <div class="flex text-sm font-medium min-w-max">
+        <button onclick="switchTab('general')" id="tab-general" class="tab-btn active px-5 py-3 border-b-2 border-transparent hover:text-red-600 flex items-center gap-2">
+          <span>📋</span> ข้อมูลทั่วไป
+        </button>
+        <button onclick="switchTab('part1')" id="tab-part1" class="tab-btn px-5 py-3 border-b-2 border-transparent hover:text-red-600 flex items-center gap-2">
+          <span>1️⃣</span> ส่วนที่ 1: ความพร้อม
+        </button>
+        <button onclick="switchTab('part2')" id="tab-part2" class="tab-btn px-5 py-3 border-b-2 border-transparent hover:text-red-600 flex items-center gap-2">
+          <span>2️⃣</span> ส่วนที่ 2: การปฏิบัติ
+        </button>
+        <button onclick="switchTab('part3')" id="tab-part3" class="tab-btn px-5 py-3 border-b-2 border-transparent hover:text-red-600 flex items-center gap-2">
+          <span>⏱️</span> ส่วนที่ 3: เวลาอพยพ
+        </button>
+        <button onclick="switchTab('part4')" id="tab-part4" class="tab-btn px-5 py-3 border-b-2 border-transparent hover:text-red-600 flex items-center gap-2">
+          <span>📊</span> ส่วนที่ 4: สรุปผล & ลายเซ็น
+        </button>
+      </div>
+    </div>
+
+    <form id="evaluationForm">
+      
+      <!-- GENERAL INFO SECTION -->
+      <section id="sec-general" class="tab-content card bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-3 mb-4 flex items-center gap-2">
+          <span class="text-red-600">📌</span> ข้อมูลสถานประกอบกิจการและการฝึกซ้อม
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อสถานประกอบกิจการ</label>
+            <input type="text" id="orgName" name="orgName" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">สถานที่ฝึกซ้อม</label>
+            <input type="text" id="location" name="location" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">วันที่ / เวลา</label>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="date" id="drillDate" name="drillDate" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500">
+              <input type="time" id="drillTime" name="drillTime" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนผู้เข้าฝึกซ้อม</label>
+            <div class="grid grid-cols-2 gap-2">
+              <input type="number" id="empCount" placeholder="พนักงาน (คน)" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500">
+              <input type="number" id="obsCount" placeholder="ผู้สังเกตการณ์ (คน)" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500">
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-slate-700 mb-2">ประเภทอาคาร/พื้นที่</label>
+            <div class="flex flex-wrap gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <label class="inline-flex items-center"><input type="checkbox" name="bType" value="ชั้นเดียว" class="w-4 h-4 text-red-600 rounded"> <span class="ml-2 text-sm">อาคารชั้นเดียว</span></label>
+              <label class="inline-flex items-center"><input type="checkbox" name="bType" value="หลายชั้น" class="w-4 h-4 text-red-600 rounded"> <span class="ml-2 text-sm">อาคารหลายชั้น</span></label>
+              <label class="inline-flex items-center"><input type="checkbox" name="bType" value="โรงงาน" class="w-4 h-4 text-red-600 rounded"> <span class="ml-2 text-sm">โรงงาน</span></label>
+              <label class="inline-flex items-center"><input type="checkbox" name="bType" value="สำนักงาน" class="w-4 h-4 text-red-600 rounded"> <span class="ml-2 text-sm">สำนักงาน</span></label>
+              <label class="inline-flex items-center gap-2"><span class="text-sm">อื่นๆ:</span> <input type="text" id="bTypeOther" class="p-1 border border-slate-300 rounded text-sm"></label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ประเมิน</label>
+            <input type="text" id="evaluatorName" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500">
+          </div>
+        </div>
+      </section>
+
+      <!-- PART 1 SECTION -->
+      <section id="sec-part1" class="tab-content hidden card bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-3 mb-4">ส่วนที่ 1: ตรวจความพร้อมก่อนเริ่มการฝึกซ้อม</h2>
+        <div id="part1Container" class="space-y-4"></div>
+      </section>
+
+      <!-- PART 2 SECTION -->
+      <section id="sec-part2" class="tab-content hidden card bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-3 mb-4">ส่วนที่ 2: ประเมินการปฏิบัติระหว่างการฝึกซ้อม</h2>
+        <div id="part2Container" class="space-y-4"></div>
+      </section>
+
+      <!-- PART 3 SECTION -->
+      <section id="sec-part3" class="tab-content hidden card bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-bold text-slate-800 border-b pb-3 mb-4">ส่วนที่ 3: การใช้เวลาและประสิทธิผลของการอพยพ</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left border-collapse border border-slate-200">
+            <thead class="bg-slate-100 text-slate-700">
+              <tr>
+                <th class="p-3 border">รายการ</th>
+                <th class="p-3 border">เวลาเริ่ม</th>
+                <th class="p-3 border">เวลาสิ้นสุด</th>
+                <th class="p-3 border">รวมเวลา</th>
+                <th class="p-3 border">เป้าหมาย/เกณฑ์</th>
+                <th class="p-3 border">ข้อสังเกต</th>
+              </tr>
+            </thead>
+            <tbody id="timeTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PART 4 SECTION -->
+      <section id="sec-part4" class="tab-content hidden space-y-6">
+        <div class="card bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h2 class="text-lg font-bold text-slate-800 border-b pb-3 mb-4">ส่วนที่ 4: การประเมินแผนและการสรุปผล</h2>
+          <div id="part4Container" class="space-y-4 mb-6"></div>
+
+          <h3 class="font-bold text-slate-800 mb-3 border-t pt-4">สรุปผลการประเมินภาพรวม</h3>
+          <div id="summaryMatrixContainer" class="space-y-3 mb-6"></div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">ข้อบกพร่อง/ข้อสังเกตสำคัญ</label>
+              <textarea id="keyDefects" rows="4" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm"></textarea>
+            </div>
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">มาตรการแก้ไข / ผู้รับผิดชอบ / กำหนดเสร็จ</label>
+              <textarea id="correctiveActions" rows="4" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIGITAL SIGNATURES -->
+        <div class="card bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h2 class="text-lg font-bold text-slate-800 border-b pb-3 mb-4">การลงนามผู้ประเมินและผู้เกี่ยวข้อง</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="text-center">
+              <label class="block text-sm font-medium text-slate-700 mb-2">ผู้ประเมิน</label>
+              <div class="border border-slate-300 rounded-lg bg-slate-50 relative">
+                <canvas id="sig1" width="280" height="130" class="w-full h-32"></canvas>
+                <button type="button" onclick="clearSig('sig1')" class="no-print absolute top-1 right-1 bg-slate-200 hover:bg-slate-300 text-xs px-2 py-1 rounded">ล้าง</button>
+              </div>
+              <input type="date" id="sigDate1" class="mt-2 text-xs p-1 border rounded w-full">
+            </div>
+
+            <div class="text-center">
+              <label class="block text-sm font-medium text-slate-700 mb-2">ผู้แทนสถานประกอบกิจการ</label>
+              <div class="border border-slate-300 rounded-lg bg-slate-50 relative">
+                <canvas id="sig2" width="280" height="130" class="w-full h-32"></canvas>
+                <button type="button" onclick="clearSig('sig2')" class="no-print absolute top-1 right-1 bg-slate-200 hover:bg-slate-300 text-xs px-2 py-1 rounded">ล้าง</button>
+              </div>
+              <input type="date" id="sigDate2" class="mt-2 text-xs p-1 border rounded w-full">
+            </div>
+
+            <div class="text-center">
+              <label class="block text-sm font-medium text-slate-700 mb-2">ผู้รับผิดชอบด้านความปลอดภัย (จป.)</label>
+              <div class="border border-slate-300 rounded-lg bg-slate-50 relative">
+                <canvas id="sig3" width="280" height="130" class="w-full h-32"></canvas>
+                <button type="button" onclick="clearSig('sig3')" class="no-print absolute top-1 right-1 bg-slate-200 hover:bg-slate-300 text-xs px-2 py-1 rounded">ล้าง</button>
+              </div>
+              <input type="date" id="sigDate3" class="mt-2 text-xs p-1 border rounded w-full">
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </form>
+  </main>
+
+  <script>
+    const part1Items = [
+      "1.1 มีแผนการดับเพลิงและแผนการอพยพหนีไฟที่เป็นปัจจุบัน และผู้เกี่ยวข้องทราบบทบาทหน้าที่",
+      "1.2 มีเหตุการณ์จำลอง/Scenario และลำดับขั้นตอนการฝึกซ้อมสอดคล้องกับแผน",
+      "1.3 มีแผนผังบริเวณ แสดงอาคาร ถนน จุดรวมพล และตำแหน่งอุปกรณ์ดับเพลิง",
+      "1.4 มีแผนผังเส้นทางหนีไฟ/ทางออกฉุกเฉินที่ชัดเจน โดยเฉพาะกรณีอาคารหลายชั้น",
+      "1.5 กำหนดผู้รับผิดชอบหลัก เช่น ผู้อำนวยการดับเพลิง/อพยพ หน่วยดับเพลิง หน่วยอพยพ ผู้ตรวจสอบยอด และหน่วยช่วยชีวิต",
+      "1.6 อุปกรณ์ที่ใช้ฝึกซ้อมเป็นอุปกรณ์จริงของสถานประกอบการและอยู่ในสภาพปลอดภัยพร้อมใช้งาน",
+      "1.7 ระบบแจ้งเหตุ/สัญญาณเตือนภัย และช่องทางแจ้งเหตุฉุกเฉินพร้อมใช้งาน",
+      "1.8 เส้นทางหนีไฟ ประตู บันได และทางออกไม่มีสิ่งกีดขวาง",
+      "1.9 จุดรวมพลมีความเหมาะสม ปลอดภัย และสามารถตรวจนับจำนวนคนได้",
+      "1.10 มีมาตรการความปลอดภัยสำหรับผู้ร่วมฝึกซ้อมและแผนหยุดการฝึกทันทีเมื่อเกิดอันตรายจริง"
+    ];
+
+    const part2Items = [
+      "2.1 การสื่อสารเมื่อพบเหตุทำได้รวดเร็ว ชัดเจน และส่งต่อข้อมูลตามลำดับ",
+      "2.2 ผู้พบเหตุสามารถแจ้งเตือนผู้ร่วมงานและดำเนินการตามขั้นตอนเบื้องต้น",
+      "2.3 ทีมดับเพลิงขั้นต้นปฏิบัติตามขั้นตอนและใช้เครื่องดับเพลิง/สายน้ำอย่างถูกต้อง",
+      "2.4 ผู้ควบคุมไฟฟ้า/เครื่องจักรดำเนินการตามแผนอย่างปลอดภัย",
+      "2.5 ผู้อำนวยการดับเพลิง/อพยพสั่งการและตัดสินใจใช้แผนอพยพได้เหมาะสม",
+      "2.6 สัญญาณแจ้งเหตุเพลิงไหม้/สัญญาณอพยพทำให้ผู้ปฏิบัติงานรับรู้ได้ทั่วถึง",
+      "2.7 ผู้นำทางหนีไฟนำผู้ปฏิบัติงานไปตามเส้นทางที่กำหนดอย่างเป็นระเบียบ",
+      "2.8 ผู้เข้าร่วมฝึกซ้อมไม่วิ่ง ไม่ย้อนกลับ และไม่ใช้ลิฟต์ในกรณีที่แผนกำหนดห้ามใช้",
+      "2.9 ผู้ตรวจสอบยอดตรวจนับและรายงานจำนวนผู้มาถึงจุดรวมพลได้ถูกต้อง",
+      "2.10 มีการค้นหา/ช่วยเหลือผู้ติดค้างหรือผู้บาดเจ็บตามสถานการณ์จำลอง",
+      "2.11 การประสานหน่วยงานภายนอก/หน่วยดับเพลิง/การแพทย์เป็นไปตามแผน",
+      "2.12 ผู้เข้าร่วมฝึกซ้อมควบคุมสติและปฏิบัติตามคำสั่งของผู้รับผิดชอบ"
+    ];
+
+    const part4Items = [
+      "4.1 แผนดับเพลิงสอดคล้องกับเหตุการณ์จำลองและการปฏิบัติจริง",
+      "4.2 แผนอพยพหนีไฟสอดคล้องกับเส้นทางหนีไฟ จุดรวมพล และการตรวจนับ",
+      "4.3 การแบ่งหน้าที่/สายการบังคับบัญชามีความชัดเจนและไม่ซ้ำซ้อน",
+      "4.4 อุปกรณ์ดับเพลิงและอุปกรณ์ช่วยเหลือเพียงพอ เหมาะสม และใช้งานได้",
+      "4.5 พบจุดบกพร่องแล้วมีการบันทึกและกำหนดผู้รับผิดชอบแก้ไข",
+      "4.6 มีการประชุมสรุปบทเรียน (After Action Review) และกำหนดมาตรการปรับปรุง"
+    ];
+
+    const timeRows = [
+      "รับรู้เหตุ/แจ้งเหตุ", "เริ่มสัญญาณอพยพ", "เริ่มเคลื่อนย้าย", 
+      "คนส่วนใหญ่ถึงจุดรวมพล", "ตรวจนับยอดครบ", "สิ้นสุดการฝึกซ้อม"
+    ];
+
+    const summaryAspects = [
+      "1. ความพร้อมก่อนฝึกซ้อม", "2. การปฏิบัติตามขั้นตอนของผู้เข้าร่วม",
+      "3. การปฏิบัติตามแผนและบทบาทหน้าที่", "4. การใช้อุปกรณ์",
+      "5. การอพยพและตรวจนับ", "6. การประเมินและปรับปรุงแผน"
+    ];
+
+    function renderChecklist(containerId, items, prefix) {
+      const container = document.getElementById(containerId);
+      items.forEach((item, idx) => {
+        const key = `${prefix}_${idx}`;
+        const html = `
+          <div class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+            <p class="font-medium text-slate-800 mb-3">${item}</p>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex space-x-2">
+                ${['ดี', 'พอใช้', 'ปรับปรุง', 'N/A'].map(val => `
+                  <label class="inline-flex items-center px-3 py-1.5 bg-white border rounded-lg cursor-pointer hover:bg-slate-100 text-sm">
+                    <input type="radio" name="score_${key}" value="${val}" class="w-4 h-4 text-red-600">
+                    <span class="ml-1.5">${val}</span>
+                  </label>
+                `).join('')}
+              </div>
+              <input type="text" id="obs_${key}" placeholder="ข้อสังเกต / หลักฐาน" class="flex-1 min-w-[200px] p-2 text-sm border border-slate-300 rounded-lg">
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+      });
+    }
+
+    function renderTimeTable() {
+      const tbody = document.getElementById('timeTableBody');
+      timeRows.forEach((row, idx) => {
+        const html = `
+          <tr>
+            <td class="p-2 border font-medium">${row}</td>
+            <td class="p-2 border"><input type="time" id="tStart_${idx}" onchange="calcDuration(${idx})" class="w-full p-1 border rounded"></td>
+            <td class="p-2 border"><input type="time" id="tEnd_${idx}" onchange="calcDuration(${idx})" class="w-full p-1 border rounded"></td>
+            <td class="p-2 border"><input type="text" id="tDuration_${idx}" readonly class="w-full p-1 bg-slate-100 border rounded text-center"></td>
+            <td class="p-2 border"><input type="text" id="tTarget_${idx}" class="w-full p-1 border rounded"></td>
+            <td class="p-2 border"><input type="text" id="tNote_${idx}" class="w-full p-1 border rounded"></td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', html);
+      });
+    }
+
+    function renderSummaryMatrix() {
+      const container = document.getElementById('summaryMatrixContainer');
+      summaryAspects.forEach((aspect, idx) => {
+        const html = `
+          <div class="flex flex-wrap items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200 gap-2">
+            <span class="font-medium text-sm text-slate-700">${aspect}</span>
+            <div class="flex space-x-3 text-sm">
+              ${['ดี', 'พอใช้', 'ปรับปรุง'].map(val => `
+                <label class="inline-flex items-center">
+                  <input type="radio" name="sum_aspect_${idx}" value="${val}" class="w-4 h-4 text-red-600">
+                  <span class="ml-1">${val}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+      });
+    }
+
+    function calcDuration(idx) {
+      const start = document.getElementById(`tStart_${idx}`).value;
+      const end = document.getElementById(`tEnd_${idx}`).value;
+      if (start && end) {
+        const [sH, sM] = start.split(':').map(Number);
+        const [eH, eM] = end.split(':').map(Number);
+        let diffMinutes = (eH * 60 + eM) - (sH * 60 + sM);
+        if (diffMinutes < 0) diffMinutes += 24 * 60;
+        document.getElementById(`tDuration_${idx}`).value = `${diffMinutes} นาที`;
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+
+    function setupCanvas(id) {
+      const canvas = document.getElementById(id);
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      }
+
+      function startDraw(e) { drawing = true; draw(e); }
+      function stopDraw() { drawing = false; ctx.beginPath(); }
+      function draw(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('touchstart', startDraw);
+      canvas.addEventListener('touchend', stopDraw);
+      canvas.addEventListener('touchmove', draw);
+    }
+
+    function clearSig(id) {
+      const canvas = document.getElementById(id);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveLocalData() {
+      alert("บันทึกข้อมูลร่างลงใน Tablet เครื่องนี้เรียบร้อยแล้ว");
+    }
+
+    window.onload = function() {
+      renderChecklist('part1Container', part1Items, 'p1');
+      renderChecklist('part2Container', part2Items, 'p2');
+      renderChecklist('part4Container', part4Items, 'p4');
+      renderTimeTable();
+      renderSummaryMatrix();
+
+      ['sig1', 'sig2', 'sig3'].forEach(setupCanvas);
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('drillDate').value = today;
+      ['sigDate1', 'sigDate2', 'sigDate3'].forEach(id => document.getElementById(id).value = today);
+    };
+  </script>
+</body>
+</html>
